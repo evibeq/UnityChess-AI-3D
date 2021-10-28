@@ -4,3 +4,5 @@ This fork is a version of [SebLague](https://github.com/SebLague)'s project, int
 The part of managing the input with the mouse, selecting and dragging the pieces was done with the help of a raycast.
 
 The part of creating and managing 3D objects is almost identical to that for 2D, except for the coordinates. Being based on existing code, the pieces are instantiated and destroyed with every move.
+
+![Alt text](Assets/Screenshots/image.png?raw=true "Screenshot")
