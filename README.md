@@ -1,7 +1,2 @@
-# Chess-AI
-A fairly simple chess program, implementing in C# in the Unity game engine.
- 
-[Watch video](https://www.youtube.com/watch?v=U4ogK0MIzqk)
-
-[Download and play](https://sebastian.itch.io/chess-ai)
-![Image](https://github.com/SebLague/Images/blob/master/Chess.png)
+# UnityChessAI-3D
+This fork is a version of [SebLague](https://github.com/SebLague)'s project, introduced with [this video](https://www.youtube.com/watch?v=U4ogK0MIzqk), which also has a 3D version of the graphic part. All the new scripts are based on those defined to manage 2D in the original version and have the same name with the addition of the letters "3D". All new files are located inside the "3D" folder except for the new scene in the "scenes" folder.
