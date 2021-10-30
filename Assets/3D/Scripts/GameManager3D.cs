@@ -20,7 +20,6 @@ namespace Chess.Game
 		public PlayerType whitePlayerType;
 		public PlayerType blackPlayerType;
 		public AISettings aiSettings;
-		public Color[] colors;
 
 		public TMPro.TMP_Text resultUI;
 
