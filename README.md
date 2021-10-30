@@ -5,4 +5,6 @@ The part of managing the input with the mouse, selecting and dragging the pieces
 
 The part of creating and managing 3D objects is almost identical to that for 2D, except for the coordinates. Being based on existing code, the pieces are instantiated and destroyed with every move.
 
+UPDATE: in addition to the 3D version of the scripts there is a version called "plus" which avoids the continuous cycle of Destroy() and Instance() to manage the pieces. Now, during a game, the prefabs are only moved!
+
 ![Alt text](Assets/Screenshots/image.png?raw=true "Screenshot")
