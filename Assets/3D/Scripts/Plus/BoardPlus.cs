@@ -13,6 +13,8 @@ namespace Chess.Game
 
 		public bool whiteIsBottom = true;
 
+		public float moveAnimDuration = 0.15f;
+
 		public GameObject[,] squareObjects;
 		public GameObject[,] squarePieceObjects;
 		Move lastMadeMove;
@@ -20,6 +22,8 @@ namespace Chess.Game
 
 		public float pieceDepth = 1f;
 		public float pieceDragDepth = 0f;
+
+		public int scaleFactor = 1;
 
 		void Awake()
 		{
@@ -48,7 +52,7 @@ namespace Chess.Game
 
 		public void DragPiece(Coord pieceCoord, Vector3 mousePos)
 		{
-			squarePieceObjects[pieceCoord.fileIndex, pieceCoord.rankIndex].transform.position = new Vector3(mousePos.x, pieceDragDepth, mousePos.z);
+			squarePieceObjects[pieceCoord.fileIndex, pieceCoord.rankIndex].transform.position = new Vector3(mousePos.x, pieceDragDepth * scaleFactor, mousePos.z);
 		}
 
 		public void ResetPiecePosition(Coord pieceCoord)
@@ -71,8 +75,9 @@ namespace Chess.Game
 
 		public bool TryGetSquareUnderMouse(Vector3 squarePos, out Coord selectedCoord)
 		{
-			int file = (int)(squarePos.x);
-			int rank = (int)(squarePos.z);
+			
+			int file = (int)(squarePos.x / scaleFactor);
+			int rank = (int)(squarePos.z / scaleFactor);
 			if (!whiteIsBottom)
 			{
 				file = 7 - file;
@@ -109,8 +114,12 @@ namespace Chess.Game
                     {
 						if (pieceTheme.GetPiecePrefab(piece) != null)
 						{
-
 							int childs = squarePieceObjects[file, rank].transform.childCount;
+							if (childs > 1)
+                            {
+								Destroy(squarePieceObjects[file, rank].transform.GetChild(0).gameObject);
+							}
+							/*
 							for (int i = 0; i < childs; i++)
 							{
 								Destroy(squarePieceObjects[file, rank].transform.GetChild(i).gameObject);
@@ -119,6 +128,7 @@ namespace Chess.Game
 							GameObject newPiece = Instantiate(pieceTheme.GetPiecePrefab(piece));
 							newPiece.transform.parent = squarePieceObjects[file, rank].transform;
 							newPiece.transform.localPosition = Vector3.zero;
+							*/
 						}
 						else
 						{
@@ -141,19 +151,33 @@ namespace Chess.Game
 
 			if (startCoordFile > targetCoordFile)
             {
-				//Debug.Log("QueenSide Castling! ");
+				Debug.Log("QueenSide Castling! ");
 				StartCoroutine(AnimateMove(new Move(move.TargetSquare - 2, move.StartSquare - 1, Move.Flag.None), board)); ;
 			} else
             {
-				//Debug.Log("KingSide Castling! ");
+				Debug.Log("KingSide Castling! ");
 				StartCoroutine(AnimateMove(new Move(move.TargetSquare + 1, move.StartSquare + 1, Move.Flag.None), board));
 			}
+		}
+
+		public void Promotion(Board board, Move move)
+        {
+			Coord coord = BoardRepresentation.CoordFromIndex(move.TargetSquare); ;
+			Transform piece = squarePieceObjects[coord.fileIndex, coord.rankIndex].transform;
+
+			Destroy(piece.GetChild(0).gameObject);
+
+			int pieceInt = board.Square[BoardRepresentation.IndexFromCoord(coord.fileIndex, coord.rankIndex)];
+
+			GameObject newPiece = Instantiate(pieceTheme.GetPiecePrefab(pieceInt));
+			newPiece.transform.parent = piece;
+			newPiece.transform.localPosition = Vector3.zero;
 		}
 
 		public void OnMoveMade(Board board, Move move, bool animate = false)
 		{
 
-			if (move.MoveFlag == Move.Flag.Castling)
+			if (move.MoveFlag == 2) //castling
 			{
 				Castling(board, move);
 			}
@@ -171,6 +195,11 @@ namespace Chess.Game
 				pieceT.transform.parent = squarePieceObjects[targetCoord.fileIndex, targetCoord.rankIndex].transform;
 				pieceT.transform.localPosition = Vector3.zero;
 
+				if (move.MoveFlag >= 3 && move.MoveFlag <= 6) //promotion
+				{
+					Promotion(board, move);
+				}
+
 				UpdatePosition(board);
 				ResetSquareColours();
 			}
@@ -179,7 +208,6 @@ namespace Chess.Game
 		IEnumerator AnimateMove(Move move, Board board)
 		{
 			float t = 0;
-			const float moveAnimDuration = 0.15f;
 			Coord startCoord = BoardRepresentation.CoordFromIndex(move.StartSquare);
 			Coord targetCoord = BoardRepresentation.CoordFromIndex(move.TargetSquare);
 			Transform pieceT = squarePieceObjects[startCoord.fileIndex, startCoord.rankIndex].transform.GetChild(0);
@@ -196,6 +224,11 @@ namespace Chess.Game
 
 			pieceT.transform.parent = squarePieceObjects[targetCoord.fileIndex, targetCoord.rankIndex].transform;
 			pieceT.transform.localPosition = Vector3.zero;
+
+			if (move.MoveFlag >= 3 && move.MoveFlag <= 6) //promotion
+			{
+				Promotion(board, move);
+			}
 
 			UpdatePosition(board);
 			ResetSquareColours();
@@ -222,6 +255,7 @@ namespace Chess.Game
 					Transform square = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
 					square.parent = transform;
 					square.name = BoardRepresentation.SquareNameFromCoordinate(file, rank);
+					square.localScale = new Vector3(1, 1, 1) * scaleFactor;
 					square.position = PositionFromCoord(file, 0, rank);
 					Material squareMaterial = new Material(squareShader);
 
@@ -295,9 +329,9 @@ namespace Chess.Game
 		{
 			if (whiteIsBottom)
 			{
-				return new Vector3(file, depth, rank);
+				return new Vector3(file, depth, rank) * scaleFactor;
 			}
-			return new Vector3(7 - file, depth, 7 - rank);
+			return new Vector3(7 - file, depth, 7 - rank) * scaleFactor;
 		}
 
 		public Vector3 PositionFromCoord(Coord coord, float depth)
