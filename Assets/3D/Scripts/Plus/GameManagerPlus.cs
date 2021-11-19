@@ -77,6 +77,12 @@ namespace Chess.Game
 			onMoveMade?.Invoke(move);
 			board3D.OnMoveMade(board, move, animateMove);
 
+			StartCoroutine(WaitAnim());
+		}
+
+		IEnumerator WaitAnim()
+		{
+			yield return new WaitForSeconds(board3D.moveAnimDuration);
 			NotifyPlayerToMove();
 		}
 
